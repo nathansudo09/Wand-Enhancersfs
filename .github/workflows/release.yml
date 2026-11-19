@@ -8,7 +8,6 @@ on:
 
 jobs:
   publish-release:
-    if: github.repository == 'k1tbyte/Wand-Enhancer'
     runs-on: windows-latest
     permissions:
       contents: write
