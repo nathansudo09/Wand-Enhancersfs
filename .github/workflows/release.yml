@@ -1,51 +1,36 @@
-name: Release
+
+name: Build Wand-Enhancer
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 jobs:
-  publish-release:
+  build:
     runs-on: windows-latest
-    permissions:
-      contents: write
-
-    env:
-      RELEASE_VERSION: ${{ github.ref_name }}
 
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+      - name: Descargar codigo
+        uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v5
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.17.0
 
-      - uses: actions/setup-node@v5
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: web-panel/pnpm-lock.yaml
 
-      - name: Extract release notes from changelog
-        shell: pwsh
-        run: ./scripts/get-changelog-section.ps1 -Version $env:RELEASE_VERSION -OutputPath release-notes.md
-
-      - name: Build release
+      - name: Compilar programa
         shell: pwsh
         run: ./build.ps1 -Configuration Release
 
-      - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
+      - name: Guardar archivos compilados
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          body_path: release-notes.md
-          files: CHANGELOG.md
-          fail_on_unmatched_files: true
-          # RC tags must not replace the latest stable release.
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          make_latest: ${{ !contains(github.ref_name, '-') }}
+          name: Wand-Enhancer-Build
+          path: |
+            **/bin/Release/**
+            **/publish/**
+          if-no-files-found: warn
